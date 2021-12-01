@@ -1,0 +1,1 @@
+../../inputs/day21.txt
