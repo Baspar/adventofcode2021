@@ -6,7 +6,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const input = ``
+const input = `forward 5
+down 5
+forward 8
+up 3
+down 8
+forward 2`
 
 func TestPart1(t *testing.T) {
 	assert := assert.New(t)
@@ -16,7 +21,7 @@ func TestPart1(t *testing.T) {
 
 	res, err := d.Part1()
 
-	assert.Equal("", res)
+	assert.Equal("150", res)
 	assert.Nil(err)
 }
 
