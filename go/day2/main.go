@@ -55,8 +55,22 @@ func (d *DayImpl) Part1() (string, error) {
 	}
 	return fmt.Sprintf("%d", x * y), nil
 }
-func (d *DayImpl) Part2() (response string, err error) {
-	return
+func (d *DayImpl) Part2() (string, error) {
+	aim := 0
+	x := 0
+	y := 0
+	for _, move := range d.input {
+		switch move.instruction {
+		case "forward":
+			x += move.value
+			y += move.value * aim
+		case "up":
+			aim -= move.value
+		case "down":
+			aim += move.value
+		}
+	}
+	return fmt.Sprintf("%d", x * y), nil
 }
 
 func main() {

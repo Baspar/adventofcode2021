@@ -33,6 +33,6 @@ func TestPart2(t *testing.T) {
 
 	res, err := d.Part2()
 
-	assert.Equal("", res)
+	assert.Equal("900", res)
 	assert.Nil(err)
 }
