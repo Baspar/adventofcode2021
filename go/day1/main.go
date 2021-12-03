@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	utils "github.com/baspar/adventofcode2021/internal"
 )
@@ -12,12 +11,11 @@ type DayImpl struct {
 	numbers []int
 }
 
-func (d *DayImpl) Init(input string) error {
+func (d *DayImpl) Init(lines []string) error {
 	var (
 		val int
 		err error
 	)
-	lines := strings.Split(strings.TrimSpace(input), "\n")
 	for _, line := range lines {
 		val, err = strconv.Atoi(line)
 		if err != nil {

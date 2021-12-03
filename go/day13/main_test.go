@@ -3,10 +3,11 @@ package main
 import (
 	"testing"
 
+	utils "github.com/baspar/adventofcode2021/internal"
 	"github.com/stretchr/testify/assert"
 )
 
-const input = ``
+var input = utils.SanitizeInput(``)
 
 func TestPart1(t *testing.T) {
 	assert := assert.New(t)

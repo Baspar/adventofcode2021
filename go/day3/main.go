@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	utils "github.com/baspar/adventofcode2021/internal"
 )
@@ -12,8 +11,7 @@ type DayImpl struct {
 	input [][]bool
 }
 
-func (d *DayImpl) Init(input string) error {
-	lines := strings.Split(strings.Trim(input, "\n"), "\n")
+func (d *DayImpl) Init(lines []string) error {
 	for _, line := range lines {
 		var inputLine []bool
 		for _, ch := range line {

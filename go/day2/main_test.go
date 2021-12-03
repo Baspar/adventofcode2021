@@ -3,15 +3,16 @@ package main
 import (
 	"testing"
 
+	utils "github.com/baspar/adventofcode2021/internal"
 	"github.com/stretchr/testify/assert"
 )
 
-const input = `forward 5
+var input = utils.SanitizeInput(`forward 5
 down 5
 forward 8
 up 3
 down 8
-forward 2`
+forward 2`)
 
 func TestPart1(t *testing.T) {
 	assert := assert.New(t)

@@ -3,10 +3,11 @@ package main
 import (
 	"testing"
 
+	utils "github.com/baspar/adventofcode2021/internal"
 	"github.com/stretchr/testify/assert"
 )
 
-const input = `199
+var input = utils.SanitizeInput(`199
 200
 208
 210
@@ -15,7 +16,7 @@ const input = `199
 240
 269
 260
-263`
+263`)
 
 func TestPart1(t *testing.T) {
 	assert := assert.New(t)

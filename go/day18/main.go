@@ -5,20 +5,16 @@ import (
 )
 
 type DayImpl struct {
-	input string
 }
 
-func (d *DayImpl) Init(input string) error {
-	d.input = input
+func (d *DayImpl) Init(lines []string) error {
 	return nil
 }
-func (d *DayImpl) Part1() (response string, err error) {
-	response = d.input
-	return
+func (d *DayImpl) Part1() (string, error) {
+	return "", nil
 }
-func (d *DayImpl) Part2() (response string, err error) {
-	response = d.input
-	return
+func (d *DayImpl) Part2() (string, error) {
+	return "", nil
 }
 
 func main() {

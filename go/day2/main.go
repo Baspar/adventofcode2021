@@ -17,13 +17,12 @@ type DayImpl struct {
 	input []Move
 }
 
-func (d *DayImpl) Init(input string) error {
+func (d *DayImpl) Init(lines []string) error {
 	var (
 		err  error
 		move Move
 	)
 
-	lines := strings.Split(strings.TrimSpace(input), "\n")
 	for index, line := range lines {
 		tokens := strings.Split(line, " ")
 		if len(tokens) < 2 {

@@ -4,13 +4,21 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 )
 
 type Day interface {
-	Init(input string) error
+	Init(input []string) error
 	Part1() (string, error)
 	Part2() (string, error)
+}
+
+var Frames = []string{"⡆", "⠇", "⠋", "⠙", "⠸", "⢰", "⣠", "⣄"}
+// ⠁⠂⠃⠄⠅⠆⠇⡀⡁⡂⡃⡄⡅⡆⡇⠈⠉⠊⠋⠌⠍⠎⠏⡈⡉⡊⡋⡌⡍⡎⡏⠐⠑⠒⠓⠔⠕⠖⠗⡐⡑⡒⡓⡔⡕⡖⡗⠘⠙⠚⠛⠜⠝⠞⠟⡘⡙⡚⡛⡜⡝⡞⡟⠠⠡⠢⠣⠤⠥⠦⠧⡠⡡⡢⡣⡤⡥⡦⡧⠨⠩⠪⠫⠬⠭⠮⠯⡨⡩⡪⡫⡬⡭⡮⡯⠰⠱⠲⠳⠴⠵⠶⠷⡰⡱⡲⡳⡴⡵⡶⡷⠸⠹⠺⠻⠼⠽⠾⠿⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⣀⣁⣂⣃⣄⣅⣆⣇⢈⢉⢊⢋⢌⢍⢎⢏⣈⣉⣊⣋⣌⣍⣎⣏⢐⢑⢒⢓⢔⢕⢖⢗⣐⣑⣒⣓⣔⣕⣖⣗⢘⢙⢚⢛⢜⢝⢞⢟⣘⣙⣚⣛⣜⣝⣞⣟⢠⢡⢢⢣⢤⢥⢦⢧⣠⣡⣢⣣⣤⣥⣦⣧⢨⢩⢪⢫⢬⢭⢮⢯⣨⣩⣪⣫⣬⣭⣮⣯⢰⢱⢲⢳⢴⢵⢶⢷⣰⣱⣲⣳⣴⣵⣶⣷⢸⢹⢺⢻⢼⢽⢾⢿⣸⣹⣺⣻⣼⣽⣾⣿
+
+func SanitizeInput(input string) []string {
+	return strings.Split(strings.TrimSpace(input), "\n")
 }
 
 func Run(day Day) {
@@ -18,9 +26,6 @@ func Run(day Day) {
 		err       error
 		stdinInfo os.FileInfo
 		content   []byte
-		part1     string
-		part2     string
-		start     time.Time
 	)
 
 	stdin := os.Stdin
@@ -40,24 +45,53 @@ func Run(day Day) {
 		return
 	}
 
-	if err = day.Init(string(content)); err != nil {
+	lines := SanitizeInput(string(content))
+	if err = day.Init(lines); err != nil {
 		fmt.Printf("Init failed: %s\n", err)
 		return
 	}
 
-	fmt.Print("Part1:\n======\n")
-	start = time.Now()
-	if part1, err = day.Part1(); err != nil {
-		fmt.Printf("Error: %s\n", err)
-	}
-	fmt.Printf("(%s)\n", time.Since(start))
-	fmt.Println(part1)
+	processPart := func(part int, f func() (string, error)) {
+		var start time.Time
 
-	fmt.Print("\nPart1:\n======\n")
-	start = time.Now()
-	if part2, err = day.Part2(); err != nil {
-		fmt.Printf("Error: %s\n", err)
+		currentFrame := 0
+		ansChan := make(chan string)
+		errChan := make(chan error)
+		ticker := time.NewTicker(100 * time.Millisecond)
+
+		defer ticker.Stop()
+		defer close(ansChan)
+		defer close(errChan)
+
+		go func() {
+			start = time.Now()
+			if ans, err := f(); err != nil {
+				errChan <- err
+			} else {
+				ansChan <- ans
+			}
+		}()
+
+		fmt.Printf("Part%d: %s", part, Frames[currentFrame])
+	Loop:
+		for {
+			select {
+			case <-ticker.C:
+				currentFrame = (currentFrame + 1) % 8
+				fmt.Printf("\rPart%d: %s", part, Frames[currentFrame])
+			case ans := <-ansChan:
+				fmt.Printf("\rPart%d: ✓ (%s)\n========\n\n", part, time.Since(start))
+				fmt.Println(ans)
+				break Loop
+			case err := <-errChan:
+				fmt.Printf("\rPart%d: 𐄂 (%s)\n========\n\n", part, time.Since(start))
+				fmt.Println(err)
+				break Loop
+			}
+		}
+		fmt.Println("")
 	}
-	fmt.Printf("(%s)\n", time.Since(start))
-	fmt.Println(part2)
+
+	processPart(1, day.Part1)
+	processPart(2, day.Part2)
 }

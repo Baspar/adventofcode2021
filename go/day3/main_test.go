@@ -3,10 +3,11 @@ package main
 import (
 	"testing"
 
+	utils "github.com/baspar/adventofcode2021/internal"
 	"github.com/stretchr/testify/assert"
 )
 
-const input = `00100
+var input = utils.SanitizeInput(`00100
 11110
 10110
 10111
@@ -17,7 +18,7 @@ const input = `00100
 10000
 11001
 00010
-01010`
+01010`)
 
 func TestPart1(t *testing.T) {
 	var (
