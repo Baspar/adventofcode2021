@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 )
 
 type Day interface {
@@ -19,6 +20,7 @@ func Run(day Day) {
 		content   []byte
 		part1     string
 		part2     string
+		start     time.Time
 	)
 
 	stdin := os.Stdin
@@ -44,14 +46,18 @@ func Run(day Day) {
 	}
 
 	fmt.Print("Part1:\n======\n")
+	start = time.Now()
 	if part1, err = day.Part1(); err != nil {
 		fmt.Printf("Error: %s\n", err)
 	}
+	fmt.Printf("(%s)\n", time.Since(start))
 	fmt.Println(part1)
 
 	fmt.Print("\nPart1:\n======\n")
+	start = time.Now()
 	if part2, err = day.Part2(); err != nil {
 		fmt.Printf("Error: %s\n", err)
 	}
+	fmt.Printf("(%s)\n", time.Since(start))
 	fmt.Println(part2)
 }
