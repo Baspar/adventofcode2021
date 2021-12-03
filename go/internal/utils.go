@@ -72,19 +72,19 @@ func Run(day Day) {
 			}
 		}()
 
-		fmt.Printf("Part%d: %s", part, Frames[currentFrame])
+		fmt.Printf("\033[1;33mPart%d: %s\033[0m", part, Frames[currentFrame])
 	Loop:
 		for {
 			select {
 			case <-ticker.C:
 				currentFrame = (currentFrame + 1) % 8
-				fmt.Printf("\rPart%d: %s", part, Frames[currentFrame])
+				fmt.Printf("\r\033[1;33mPart%d: %s\033[0m", part, Frames[currentFrame])
 			case ans := <-ansChan:
-				fmt.Printf("\rPart%d: ✓ (%s)\n========\n\n", part, time.Since(start))
+				fmt.Printf("\r\033[1;32mPart%d: ✓\033[0m (%s)\n\n", part, time.Since(start))
 				fmt.Println(ans)
 				break Loop
 			case err := <-errChan:
-				fmt.Printf("\rPart%d: 𐄂 (%s)\n========\n\n", part, time.Since(start))
+				fmt.Printf("\r\033[1;31mPart%d: 𐄂\033[0m (%s)\n\n", part, time.Since(start))
 				fmt.Println(err)
 				break Loop
 			}
