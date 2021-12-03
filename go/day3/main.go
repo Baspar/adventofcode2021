@@ -3,26 +3,21 @@ package main
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	utils "github.com/baspar/adventofcode2021/internal"
 )
 
 type DayImpl struct {
-	input [][]int
+	input [][]bool
 }
 
 func (d *DayImpl) Init(input string) error {
 	lines := strings.Split(strings.Trim(input, "\n"), "\n")
 	for _, line := range lines {
-		var inputLine []int
+		var inputLine []bool
 		for _, ch := range line {
-			if val, err := strconv.Atoi(string(ch)); err != nil {
-				return errors.New(fmt.Sprintf("Unknown value: %c", ch))
-			} else {
-				inputLine = append(inputLine, val)
-			}
+			inputLine = append(inputLine, ch == '1')
 		}
 		d.input = append(d.input, inputLine)
 	}
@@ -33,6 +28,7 @@ func (d *DayImpl) Init(input string) error {
 
 	return nil
 }
+
 func (d *DayImpl) Part1() (string, error) {
 	nbBits := len(d.input[0])
 
@@ -40,7 +36,7 @@ func (d *DayImpl) Part1() (string, error) {
 	epsilonRate := 0
 
 	for i := 0; i < nbBits; i++ {
-		hist := make(map[int]int)
+		hist := make(map[bool]int)
 
 		for _, line := range d.input {
 			hist[line[i]] += 1
@@ -48,7 +44,7 @@ func (d *DayImpl) Part1() (string, error) {
 
 		gammaRate *= 2
 		epsilonRate *= 2
-		if hist[1] > hist[0] {
+		if hist[true] > hist[false] {
 			gammaRate += 1
 		} else {
 			epsilonRate += 1
@@ -57,8 +53,52 @@ func (d *DayImpl) Part1() (string, error) {
 
 	return fmt.Sprintf("%d", gammaRate*epsilonRate), nil
 }
+
 func (d *DayImpl) Part2() (response string, err error) {
-	return
+	process := func(getCO2 bool) []bool {
+		validLineIndexes := make(map[int]struct{})
+		for index := range d.input {
+			validLineIndexes[index] = struct{}{}
+		}
+
+		nbBits := len(d.input[0])
+		for currentBit := 0; currentBit < nbBits && len(validLineIndexes) > 1; currentBit++ {
+			hist := make(map[bool]int)
+
+			for lineIndex := range validLineIndexes {
+				hist[d.input[lineIndex][currentBit]] += 1
+			}
+
+			valueToRemove := getCO2 == (hist[true] >= hist[false])
+
+			for lineIndex := range validLineIndexes {
+				if d.input[lineIndex][currentBit] == valueToRemove {
+					delete(validLineIndexes, lineIndex)
+				}
+			}
+		}
+
+		var out []bool
+		for lineIndex := range validLineIndexes {
+			out = d.input[lineIndex]
+		}
+		return out
+	}
+	binary2Int := func(binary []bool) int {
+		out := 0
+		for _, b := range binary {
+			out *= 2
+			if b {
+				out += 1
+			}
+		}
+		return out
+	}
+
+	oxyGenRating := binary2Int(process(false))
+	co2ScrubRating := binary2Int(process(true))
+
+	return fmt.Sprintf("%d", oxyGenRating*co2ScrubRating), nil
 }
 
 func main() {
