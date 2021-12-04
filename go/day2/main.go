@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -26,13 +25,13 @@ func (d *DayImpl) Init(lines []string) error {
 	for index, line := range lines {
 		tokens := strings.Split(line, " ")
 		if len(tokens) < 2 {
-			return errors.New(fmt.Sprintf("(#%d) Line '%s' is misshappen", index, line))
+			return fmt.Errorf("(#%d) Line '%s' is misshappen", index, line)
 		}
 
 		move.instruction = tokens[0]
 		move.value, err = strconv.Atoi(tokens[1])
 		if err != nil {
-			return errors.New(fmt.Sprintf("(#%d) Cannot convert %s to int", index, tokens[1]))
+			return fmt.Errorf("(#%d) Cannot convert %s to int", index, tokens[1])
 		}
 
 		d.input = append(d.input, move)

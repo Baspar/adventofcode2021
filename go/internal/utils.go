@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -35,12 +35,12 @@ func Run(day Day) {
 	}
 
 	if (stdinInfo.Mode() & os.ModeCharDevice) == 0 {
-		if content, err = ioutil.ReadAll(stdin); err != nil {
+		if content, err = io.ReadAll(stdin); err != nil {
 			fmt.Printf("Cannot read stdin %s\n", err)
 		} else {
 			fmt.Print("Using stdin\n\n")
 		}
-	} else if content, err = ioutil.ReadFile("./input.txt"); err != nil {
+	} else if content, err = os.ReadFile("./input.txt"); err != nil {
 		fmt.Printf("Input reading failed: %s\n", err)
 		return
 	}
