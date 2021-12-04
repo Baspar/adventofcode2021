@@ -20,10 +20,10 @@ func (g *Grid) print() {
 	for _, line := range *g {
 		for _, cell := range line {
 			if cell.marked {
-				fmt.Printf("*% d*", cell.number)
+				fmt.Printf("*% 2d*", cell.number)
 			} else {
-				fmt.Printf(" % d ", cell.number)
-			} 
+				fmt.Printf(" % 2d ", cell.number)
+			}
 		}
 		fmt.Println()
 	}
@@ -70,6 +70,34 @@ type DayImpl struct {
 	grids   []Grid
 }
 
+func (d *DayImpl) playUntilOneWinningGrid() (int, error) {
+	for _, number := range d.numbers {
+		for _, grid := range d.grids {
+			if grid.MarkNumberAndCheckForWinning(number) {
+				return grid.SumUnmarked() * number, nil
+			}
+		}
+	}
+
+	return -1, errors.New("No winning grid has been found")
+}
+func (d *DayImpl) playUntilLastWinningGrid() (int, error) {
+	hasWon := make(map[int]bool)
+
+	for _, number := range d.numbers {
+		for gridIndex, grid := range d.grids {
+			if !hasWon[gridIndex] && grid.MarkNumberAndCheckForWinning(number) {
+				hasWon[gridIndex] = true
+				if len(hasWon) == len(d.grids) {
+					return grid.SumUnmarked() * number, nil
+				}
+			}
+		}
+	}
+
+	return -1, errors.New("No winning grid has been found")
+}
+
 func (d *DayImpl) Init(lines []string) error {
 	var (
 		number int
@@ -108,18 +136,6 @@ func (d *DayImpl) Init(lines []string) error {
 
 	return nil
 }
-func (d *DayImpl) playUntilOneWinningGrid() (int, error) {
-	for _, number := range d.numbers {
-		for _, grid := range d.grids {
-			winning := grid.MarkNumberAndCheckForWinning(number)
-			if winning {
-				return grid.SumUnmarked() * number, nil
-			}
-		}
-	}
-
-	return -1, errors.New("No winning grid has been found")
-}
 func (d *DayImpl) Part1() (string, error) {
 	finalScore, err := d.playUntilOneWinningGrid()
 	if err != nil {
@@ -129,7 +145,12 @@ func (d *DayImpl) Part1() (string, error) {
 	return fmt.Sprint(finalScore), nil
 }
 func (d *DayImpl) Part2() (string, error) {
-	return "", nil
+	finalScore, err := d.playUntilLastWinningGrid()
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprint(finalScore), nil
 }
 
 func main() {
