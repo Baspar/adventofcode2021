@@ -9,25 +9,18 @@ import (
 	utils "github.com/baspar/adventofcode2021/internal"
 )
 
+// Structs
 type Cell struct {
 	number int
 	marked bool
 }
-
 type Grid [][]Cell
-
-func (g *Grid) print() {
-	for _, line := range *g {
-		for _, cell := range line {
-			if cell.marked {
-				fmt.Printf("*% 2d*", cell.number)
-			} else {
-				fmt.Printf(" % 2d ", cell.number)
-			}
-		}
-		fmt.Println()
-	}
+type DayImpl struct {
+	numbers []int
+	grids   []Grid
 }
+
+// Grid Methods
 func (g *Grid) SumUnmarked() int {
 	total := 0
 	for _, line := range *g {
@@ -41,13 +34,10 @@ func (g *Grid) SumUnmarked() int {
 }
 func (g *Grid) CheckGrid(i int, j int) bool {
 	lineComplete := true
-	for d := 0; lineComplete && d < 5; d++ {
-		lineComplete = (*g)[i][d].marked
-	}
-
 	rowComplete := true
-	for d := 0; rowComplete && d < 5; d++ {
-		rowComplete = (*g)[d][j].marked
+	for d := 0; d < 5; d++ {
+		lineComplete = lineComplete && (*g)[i][d].marked
+		rowComplete = rowComplete && (*g)[d][j].marked
 	}
 
 	return lineComplete || rowComplete
@@ -62,33 +52,19 @@ func (g *Grid) MarkNumberAndCheckForWinning(number int) bool {
 			}
 		}
 	}
+
 	return gridSolved
 }
 
-type DayImpl struct {
-	numbers []int
-	grids   []Grid
-}
-
-func (d *DayImpl) playUntilOneWinningGrid() (int, error) {
-	for _, number := range d.numbers {
-		for _, grid := range d.grids {
-			if grid.MarkNumberAndCheckForWinning(number) {
-				return grid.SumUnmarked() * number, nil
-			}
-		}
-	}
-
-	return -1, errors.New("No winning grid has been found")
-}
-func (d *DayImpl) playUntilLastWinningGrid() (int, error) {
+// DayImpl Methods
+func (d *DayImpl) PlayUntilNthWinningGrid(nth int) (int, error) {
 	hasWon := make(map[int]bool)
 
 	for _, number := range d.numbers {
 		for gridIndex, grid := range d.grids {
 			if !hasWon[gridIndex] && grid.MarkNumberAndCheckForWinning(number) {
 				hasWon[gridIndex] = true
-				if len(hasWon) == len(d.grids) {
+				if len(hasWon) == nth {
 					return grid.SumUnmarked() * number, nil
 				}
 			}
@@ -97,7 +73,6 @@ func (d *DayImpl) playUntilLastWinningGrid() (int, error) {
 
 	return -1, errors.New("No winning grid has been found")
 }
-
 func (d *DayImpl) Init(lines []string) error {
 	var (
 		number int
@@ -137,7 +112,7 @@ func (d *DayImpl) Init(lines []string) error {
 	return nil
 }
 func (d *DayImpl) Part1() (string, error) {
-	finalScore, err := d.playUntilOneWinningGrid()
+	finalScore, err := d.PlayUntilNthWinningGrid(1)
 	if err != nil {
 		return "", err
 	}
@@ -145,7 +120,8 @@ func (d *DayImpl) Part1() (string, error) {
 	return fmt.Sprint(finalScore), nil
 }
 func (d *DayImpl) Part2() (string, error) {
-	finalScore, err := d.playUntilLastWinningGrid()
+	// No need to reset the grids, since it'll be re-running the numbers already marked
+	finalScore, err := d.PlayUntilNthWinningGrid(len(d.grids))
 	if err != nil {
 		return "", err
 	}
