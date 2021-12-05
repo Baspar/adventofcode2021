@@ -15,15 +15,20 @@ type Coord struct {
 }
 type DayImpl []Coord
 
-func mark(x int, y int, hist *(map[int]map[int]int)) {
+func markCell(x int, y int, hist *(map[int]map[int]int)) {
 	if (*hist)[x] == nil {
 		(*hist)[x] = make(map[int]int)
 	}
 
-	if _, exist := (*hist)[x][y]; !exist {
-		(*hist)[x][y] = 0
-	}
 	(*hist)[x][y] += 1
+}
+func direction(from int, to int) int {
+	if from == to {
+		return 0
+	}
+
+	d := (to - from)
+	return d / math.Abs(d)
 }
 
 func (d *DayImpl) Init(lines []string) error {
@@ -40,22 +45,18 @@ func (d *DayImpl) Part1() (string, error) {
 	hist := make(map[int]map[int]int)
 
 	for _, coord := range *d {
-		dirX := math.Direction(coord.x1, coord.x2)
-		dirY := math.Direction(coord.y1, coord.y2)
+		isRow := coord.x1 == coord.x2
+		isColumn := coord.y1 == coord.y2
+		if !(isRow || isColumn) {
+			continue
+		}
 
-		if coord.x1 == coord.x2 {
-			for y := coord.y1; ; y += dirY {
-				mark(coord.x1, y, &hist)
-				if y == coord.y2 {
-					break
-				}
-			}
-		} else if coord.y1 == coord.y2 {
-			for x := coord.x1; ; x += dirX {
-				mark(x, coord.y1, &hist)
-				if x == coord.x2 {
-					break
-				}
+		dx := direction(coord.x1, coord.x2)
+		dy := direction(coord.y1, coord.y2)
+		for x, y := coord.x1, coord.y1; ; x, y = x+dx, y+dy {
+			markCell(x, y, &hist)
+			if x == coord.x2 && y == coord.y2 {
+				break
 			}
 		}
 	}
@@ -75,28 +76,19 @@ func (d *DayImpl) Part2() (string, error) {
 	hist := make(map[int]map[int]int)
 
 	for _, coord := range *d {
-		dirX := math.Direction(coord.x1, coord.x2)
-		dx := math.Abs(coord.x1 - coord.x2)
-		dirY := math.Direction(coord.y1, coord.y2)
-		dy := math.Abs(coord.y1 - coord.y2)
+		isRow := coord.x1 == coord.x2
+		isColumn := coord.y1 == coord.y2
+		isDiagonal := math.Abs(coord.x1 - coord.x2) == math.Abs(coord.y1 - coord.y2)
+		if !(isRow || isColumn || isDiagonal) {
+			continue
+		}
 
-		if coord.x1 == coord.x2 {
-			for y := coord.y1; ; y += dirY {
-				mark(coord.x1, y, &hist)
-				if y == coord.y2 {
-					break
-				}
-			}
-		} else if coord.y1 == coord.y2 {
-			for x := coord.x1; ; x += dirX {
-				mark(x, coord.y1, &hist)
-				if x == coord.x2 {
-					break
-				}
-			}
-		} else if dx == dy {
-			for d := 0; d <= dx; d++ {
-				mark(coord.x1+d*dirX, coord.y1+d*dirY, &hist)
+		dx := direction(coord.x1, coord.x2)
+		dy := direction(coord.y1, coord.y2)
+		for x, y := coord.x1, coord.y1; ; x, y = x+dx, y+dy {
+			markCell(x, y, &hist)
+			if x == coord.x2 && y == coord.y2 {
+				break
 			}
 		}
 	}
