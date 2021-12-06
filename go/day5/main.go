@@ -32,6 +32,7 @@ func direction(from int, to int) int {
 }
 
 func (d *DayImpl) Init(lines []string) error {
+	*d = nil
 	for _, line := range lines {
 		var c Coord
 		if _, err := fmt.Sscanf(line, "%d,%d -> %d,%d", &c.x1, &c.y1, &c.x2, &c.y2); err != nil {

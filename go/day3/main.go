@@ -12,6 +12,7 @@ type DayImpl struct {
 }
 
 func (d *DayImpl) Init(lines []string) error {
+	d.input = nil
 	for _, line := range lines {
 		var inputLine []bool
 		for _, ch := range line {

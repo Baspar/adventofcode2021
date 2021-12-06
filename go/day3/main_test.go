@@ -20,6 +20,8 @@ var input = utils.SanitizeInput(`00100
 00010
 01010`)
 
+var d = &DayImpl{}
+
 func TestPart1(t *testing.T) {
 	var (
 		err error
@@ -27,8 +29,6 @@ func TestPart1(t *testing.T) {
 	)
 	assert := assert.New(t)
 
-	d := &DayImpl{}
-	
 	err = d.Init(input)
 	assert.Nil(err)
 
@@ -45,8 +45,6 @@ func TestPart2(t *testing.T) {
 	)
 	assert := assert.New(t)
 
-	d := &DayImpl{}
-	
 	err = d.Init(input)
 	assert.Nil(err)
 

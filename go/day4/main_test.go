@@ -27,10 +27,11 @@ var input = utils.SanitizeInput(`7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,
 22 11 13  6  5
  2  0 12  3  7`)
 
+var d = &DayImpl{}
+
 func TestPart1(t *testing.T) {
 	assert := assert.New(t)
 
-	d := &DayImpl{}
 	d.Init(input)
 
 	res, err := d.Part1()
@@ -42,7 +43,6 @@ func TestPart1(t *testing.T) {
 func TestPart2(t *testing.T) {
 	assert := assert.New(t)
 
-	d := &DayImpl{}
 	d.Init(input)
 
 	res, err := d.Part2()

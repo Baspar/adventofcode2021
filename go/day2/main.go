@@ -22,6 +22,7 @@ func (d *DayImpl) Init(lines []string) error {
 		move Move
 	)
 
+	d.input = nil
 	for index, line := range lines {
 		tokens := strings.Split(line, " ")
 		if len(tokens) < 2 {

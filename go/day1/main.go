@@ -16,6 +16,7 @@ func (d *DayImpl) Init(lines []string) error {
 		val int
 		err error
 	)
+	d.numbers = nil
 	for _, line := range lines {
 		val, err = strconv.Atoi(line)
 		if err != nil {
