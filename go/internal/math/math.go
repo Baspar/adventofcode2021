@@ -1,21 +1,25 @@
 package math
 
-func Min(a int, b int) int {
-	if a < b {
-		return a
+func Min(ns ...int) int {
+	min := ns[0]
+	for _, n := range ns {
+		if n < min {
+			min = n
+		}
 	}
-
-	return b
+	return min
 }
-func Max(a int, b int) int {
-	if a < b {
-		return b
+func Max(ns ...int) int {
+	max := ns[0]
+	for _, n := range ns {
+		if n > max {
+			max = n
+		}
 	}
-
-	return a
+	return max
 }
-func Extremum(a int, b int) (int, int) {
-	return Min(a, b), Max(a, b)
+func Extremum(n ...int) (int, int) {
+	return Min(n...), Max(n...)
 }
 func Abs(a int) int {
 	if a >= 0 {

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var input = utils.SanitizeInput(``)
+var input = utils.SanitizeInput(`16,1,2,0,4,2,7,1,2,14`)
 
 var d = &DayImpl{}
 
@@ -18,7 +18,7 @@ func TestPart1(t *testing.T) {
 
 	res, err := d.Part1()
 
-	assert.Equal("", res)
+	assert.Equal("37", res)
 	assert.Nil(err)
 }
 
@@ -29,6 +29,6 @@ func TestPart2(t *testing.T) {
 
 	res, err := d.Part2()
 
-	assert.Equal("", res)
+	assert.Equal("168", res)
 	assert.Nil(err)
 }
