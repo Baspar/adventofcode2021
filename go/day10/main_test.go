@@ -7,7 +7,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var input = utils.SanitizeInput(``)
+var input = utils.SanitizeInput(`[({(<(())[]>[[{[]{<()<>>
+[(()[<>])]({[<{<<[]>>(
+{([(<{}[<>[]}>{[]{[(<()>
+(((({<>}<{<{<>}{[]{[]{}
+[[<[([]))<([[{}[[()]]]
+[{[{({}]{}}([{[{{{}}([]
+{<[[]]>}<{[{[{[]{()[[[]
+[<(<(<(<{}))><([]([]()
+<{([([[(<>()){}]>(<<{{
+<{([{{}}[<[[[<>{}]]]>[]]`)
 
 var d = &DayImpl{}
 
@@ -18,7 +27,7 @@ func TestPart1(t *testing.T) {
 
 	res, err := d.Part1()
 
-	assert.Equal("", res)
+	assert.Equal("26397", res)
 	assert.Nil(err)
 }
 
@@ -29,6 +38,6 @@ func TestPart2(t *testing.T) {
 
 	res, err := d.Part2()
 
-	assert.Equal("", res)
+	assert.Equal("288957", res)
 	assert.Nil(err)
 }
