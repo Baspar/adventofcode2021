@@ -47,13 +47,14 @@ func Run(day Day) {
 	}
 
 	lines := SanitizeInput(string(content))
-	if err = day.Init(lines); err != nil {
-		fmt.Printf("Init failed: %s\n", err)
-		return
-	}
 
 	processPart := func(part int, f func() (string, error)) {
 		var start time.Time
+
+		if err = day.Init(lines); err != nil {
+			fmt.Printf("Init failed: %s\n", err)
+			return
+		}
 
 		currentFrame := 0
 		ansChan := make(chan string)
