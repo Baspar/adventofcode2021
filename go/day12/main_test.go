@@ -69,13 +69,21 @@ func TestPart1(t *testing.T) {
 	}
 }
 
-// func TestPart2(t *testing.T) {
-// 	assert := assert.New(t)
-//
-// 	d.Init(input)
-//
-// 	res, err := d.Part2()
-//
-// 	assert.Equal("", res)
-// 	assert.Nil(err)
-// }
+func TestPart2(t *testing.T) {
+	inputs := []TestSet{
+		{input1, "36"},
+		{input2, "103"},
+		{input3, "3509"},
+	}
+
+	assert := assert.New(t)
+
+	for _, testSet := range inputs {
+		d.Init(testSet.input)
+
+		res, err := d.Part2()
+
+		assert.Equal(testSet.expected, res)
+		assert.Nil(err)
+	}
+}
