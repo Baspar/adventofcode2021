@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	utils "github.com/baspar/adventofcode2021/internal"
+	"github.com/baspar/adventofcode2021/internal/math"
 )
 
 type Grid map[int]map[int]bool
@@ -48,15 +49,21 @@ func (d *DayImpl) fold(i int) {
 	d.g = newG
 }
 func (d *DayImpl) Init(lines []string) error {
-	readingFold := false
+	readingGrid := true
 	d.g = make(Grid)
 	for _, line := range lines {
 		if line == "" {
-			readingFold = true
+			readingGrid = false
 			continue
 		}
 
-		if readingFold {
+		if readingGrid {
+			var x, y int
+			if _, err := fmt.Sscanf(line, "%d,%d", &y, &x); err != nil {
+				return fmt.Errorf("Cannot read Cell for '%s': %w", line, err)
+			}
+			d.g.add(x, y)
+		} else {
 			tokens := strings.Split(line, " ")
 			var (
 				dir   rune
@@ -66,13 +73,7 @@ func (d *DayImpl) Init(lines []string) error {
 			if _, err := fmt.Sscanf(token, "%c=%d", &dir, &coord); err != nil {
 				return fmt.Errorf("Cannot read fold for '%s': %w", token, err)
 			}
-			d.folds = append(d.folds, Fold{isVertical: dir == 'x', coord: coord})
-		} else {
-			var x, y int
-			if _, err := fmt.Sscanf(line, "%d,%d", &x, &y); err != nil {
-				return fmt.Errorf("Cannot read Cell for '%s': %w", line, err)
-			}
-			d.g.add(x, y)
+			d.folds = append(d.folds, Fold{isVertical: dir == 'y', coord: coord})
 		}
 	}
 
@@ -80,14 +81,43 @@ func (d *DayImpl) Init(lines []string) error {
 }
 func (d *DayImpl) Part1() (string, error) {
 	d.fold(0)
+
 	tot := 0
 	for _, line := range d.g {
 		tot += len(line)
 	}
+
 	return fmt.Sprintf("%d", tot), nil
 }
 func (d *DayImpl) Part2() (string, error) {
-	return "", nil
+	for i := range d.folds {
+		d.fold(i)
+	}
+
+	var xs, ys []int
+	for x := range d.g {
+		xs = append(xs, x)
+		for y := range d.g[x] {
+			ys = append(ys, y)
+		}
+	}
+
+	minX, maxX := math.Extremum(xs...)
+	minY, maxY := math.Extremum(ys...)
+
+	s := ""
+	for x := minX; x <= maxX; x++ {
+		for y := minY; y <= maxY; y++ {
+			if d.g[x][y] {
+				s += "██"
+			} else {
+				s += "  "
+			}
+		}
+		s += "\n"
+	}
+
+	return s, nil
 }
 
 func main() {

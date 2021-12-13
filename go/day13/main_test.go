@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
 	utils "github.com/baspar/adventofcode2021/internal"
@@ -49,6 +50,12 @@ func TestPart2(t *testing.T) {
 
 	res, err := d.Part2()
 
-	assert.Equal("", res)
+	assert.Equal(strings.TrimLeft(`
+██████████
+██      ██
+██      ██
+██      ██
+██████████
+`, "\n"), res)
 	assert.Nil(err)
 }
