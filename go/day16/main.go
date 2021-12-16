@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	utils "github.com/baspar/adventofcode2021/internal"
+	"github.com/baspar/adventofcode2021/internal/math"
 )
 
 var translation = map[rune][]int{
@@ -31,6 +32,7 @@ type Packet struct {
 	literal    int
 	subpackets []Packet
 }
+
 func (p Packet) getSumVersions() (sum int) {
 	sum += p.version
 	for _, subpacket := range p.subpackets {
@@ -38,8 +40,47 @@ func (p Packet) getSumVersions() (sum int) {
 	}
 	return
 }
+func (p Packet) getValue() (sum int) {
+	switch p.typeID {
+	case 0: // Sum
+		for _, subpacket := range p.subpackets {
+			sum += subpacket.getValue()
+		}
+	case 1: // Product
+		sum = 1
+		for _, subpacket := range p.subpackets {
+			sum *= subpacket.getValue()
+		}
+	case 2: // Min
+		sum = p.subpackets[0].getValue()
+		for _, subpacket := range p.subpackets {
+			sum = math.Min(sum, subpacket.getValue())
+		}
+	case 3: // Max
+		sum = p.subpackets[0].getValue()
+		for _, subpacket := range p.subpackets {
+			sum = math.Max(sum, subpacket.getValue())
+		}
+	case 4: // Literal
+		sum = p.literal
+	case 5: // Greater than
+		if p.subpackets[0].getValue() > p.subpackets[1].getValue() {
+			sum = 1
+		}
+	case 6: // Lesser than
+		if p.subpackets[0].getValue() < p.subpackets[1].getValue() {
+			sum = 1
+		}
+	case 7: // Equals
+		if p.subpackets[0].getValue() == p.subpackets[1].getValue() {
+			sum = 1
+		}
+	}
+	return
+}
 
 type Bits []int
+
 func (b Bits) readInt(ptr *int, size int) (value int) {
 	for i := 0; i < size; i++ {
 		value *= 2
@@ -55,34 +96,34 @@ func (b Bits) readSubpackets(ptr *int) (subpackets []Packet) {
 		length := b.readInt(ptr, 15)
 		target := *ptr + length
 		for *ptr != target {
-			subpackets = append(subpackets, b.parsePacket(ptr))
+			subpackets = append(subpackets, b.readPacket(ptr))
 		}
 	} else {
 		nbPackets := b.readInt(ptr, 11)
 		for i := 0; i < nbPackets; i++ {
-			subpackets = append(subpackets, b.parsePacket(ptr))
+			subpackets = append(subpackets, b.readPacket(ptr))
 		}
 	}
 	return
 }
 func (b Bits) readLiteral(ptr *int) (literal int) {
 	for {
-		isLastGroup, block := b.readLiteralBlock(ptr)
+		isLastBlock, block := b.readLiteralBlock(ptr)
 		literal *= 16
 		literal += block
-		if isLastGroup {
+		if isLastBlock {
 			break
 		}
 	}
 	return
 }
-func (b Bits) readLiteralBlock(ptr *int) (isLastGroup bool, value int) {
-	isLastGroup = b[*ptr] == 0
+func (b Bits) readLiteralBlock(ptr *int) (isLastBlock bool, value int) {
+	isLastBlock = b[*ptr] == 0
 	*ptr++
 	value = b.readInt(ptr, 4)
 	return
 }
-func (b Bits) parsePacket(ptr *int) (packet Packet) {
+func (b Bits) readPacket(ptr *int) (packet Packet) {
 	packet.version = b.readInt(ptr, 3)
 	packet.typeID = b.readInt(ptr, 3)
 
@@ -98,7 +139,9 @@ func (b Bits) parsePacket(ptr *int) (packet Packet) {
 type DayImpl struct {
 	bits Bits
 }
+
 func (d *DayImpl) Init(lines []string) error {
+	d.bits = make(Bits, 0)
 	for _, r := range lines[0] {
 		d.bits = append(d.bits, translation[r]...)
 	}
@@ -106,11 +149,13 @@ func (d *DayImpl) Init(lines []string) error {
 }
 func (d *DayImpl) Part1() (string, error) {
 	ptr := 0
-	ans := d.bits.parsePacket(&ptr).getSumVersions()
+	ans := d.bits.readPacket(&ptr).getSumVersions()
 	return fmt.Sprint(ans), nil
 }
 func (d *DayImpl) Part2() (string, error) {
-	return "", nil
+	ptr := 0
+	ans := d.bits.readPacket(&ptr).getValue()
+	return fmt.Sprint(ans), nil
 }
 
 func main() {
