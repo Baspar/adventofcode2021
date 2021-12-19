@@ -16,7 +16,6 @@ var rotY = Matrix{{COS, 0, SIN}, {0, 1, 0}, {-SIN, 0, COS}}
 var rotZ = Matrix{{COS, -SIN, 0}, {SIN, COS, 0}, {0, 0, 1}}
 
 type Point [3]int
-
 func (p1 Point) minus(p2 Point) (p Point) {
 	for i := range p {
 		p[i] = p1[i] - p2[i]
@@ -25,7 +24,6 @@ func (p1 Point) minus(p2 Point) (p Point) {
 }
 
 type Scanner []Point
-
 func (scanner Scanner) shiftBy(p Point) (s Scanner) {
 	for _, point := range scanner {
 		s = append(s, point.minus(p))
@@ -88,35 +86,31 @@ func (scanner Scanner) allPermutations() (scanners []Scanner) {
 	}
 	return
 }
-func (s1 Scanner) nbAlignedPoints(s2 Scanner) (nbAlignedPoints int) {
-	pointsInS1 := make(map[Point]bool)
-	for _, p := range s1 {
-		pointsInS1[p] = true
-	}
-	for _, p := range s2 {
-		if pointsInS1[p] {
-			nbAlignedPoints++
-		}
-	}
-	return
-}
-func (s1 Scanner) isAlignedWith(s2 Scanner) (isAligned bool, anchorPoint1 Point, anchorPoint2 Point) {
-	for _, anchorPoint1 = range s1 {
-		for _, anchorPoint2 = range s2 {
-			nbAlignedPoints := s1.nbAlignedPoints(s2.shiftBy(anchorPoint2.minus(anchorPoint1)))
-			if nbAlignedPoints >= 12 {
-				return true, anchorPoint1, anchorPoint2
+func (s Scanner) isAlignedWithCloud(cloud map[Point][]int) (isAligned bool, shift Point) {
+		for p1 := range cloud {
+			for _, p2 := range s {
+				shift = p2.minus(p1)
+
+				alignedPoints := make(map[int]int)
+				for _, p := range s.shiftBy(shift) {
+					if scanners, exists := cloud[p]; exists {
+						for _, scannerId := range scanners {
+							alignedPoints[scannerId]++
+							if alignedPoints[scannerId] >= 12 {
+								return true, shift
+							}
+						}
+					}
+				}
 			}
 		}
-	}
-	return false, Point{}, Point{}
+		return false, shift
 }
 
 type DayImpl struct {
 	scanners []Scanner
 }
-
-func (d DayImpl) alignScanners() (alignedScanners map[int]Scanner) {
+func (d DayImpl) alignScanners() (alignedScanners map[int]Scanner, pointCloud map[Point][]int, err error) {
 	alignedScanners = make(map[int]Scanner)
 	otherScannersOrientations := make(map[int][]Scanner)
 	for i, scanner := range d.scanners {
@@ -127,24 +121,33 @@ func (d DayImpl) alignScanners() (alignedScanners map[int]Scanner) {
 		}
 	}
 
-	tryToAlign2Scanners := func() {
-		for i, s1 := range alignedScanners {
-			for scannerId, otherScannerOrientations := range otherScannersOrientations {
-				for _, s2 := range otherScannerOrientations {
-					if isAligned, p1, p2 := s1.isAlignedWith(s2); isAligned {
-						alignedScanners[scannerId] = s2.shiftBy(p2.minus(p1))
-						delete(otherScannersOrientations, scannerId)
-						fmt.Printf("Aligning scanner %d with %d (%d/%d) <= [%d/%d]\n", scannerId, i, len(alignedScanners), len(d.scanners), len(otherScannersOrientations), len(d.scanners))
-						return
+	pointCloud = make(map[Point][]int)
+	for _, point := range d.scanners[0] {
+		pointCloud[point] = []int{0}
+	}
+
+	alignScannerWithCloud := func() (err error) {
+		for scannerId, otherScannerOrientations := range otherScannersOrientations {
+			for _, s := range otherScannerOrientations {
+				if isAligned, shift := s.isAlignedWithCloud(pointCloud); isAligned {
+					alignedScanners[scannerId] = s
+					delete(otherScannersOrientations, scannerId)
+					fmt.Printf("\nAligned scanner %d (%d/%d)   \r\033[1F", scannerId, len(alignedScanners), len(d.scanners))
+					for _, p := range s {
+						p = p.minus(shift)
+						pointCloud[p] = append(pointCloud[p], scannerId)
 					}
+					return
 				}
 			}
 		}
-		fmt.Println("Found nothing ಥ_ಥ")
+		return fmt.Errorf("Cannot align any scanner")
 	}
 
 	for len(otherScannersOrientations) > 0 {
-		tryToAlign2Scanners()
+		if err := alignScannerWithCloud(); err != nil {
+			return nil, nil, err
+		}
 	}
 
 	return
@@ -166,15 +169,12 @@ func (d *DayImpl) Init(lines []string) error {
 	return nil
 }
 func (d *DayImpl) Part1() (string, error) {
-	alignedScanners := d.alignScanners()
-
-	points := make(map[Point]bool)
-	for _, scanner := range alignedScanners {
-		for _, point := range scanner {
-			points[point] = true
-		}
+	_, pointCloud, err := d.alignScanners()
+	if err != nil {
+		return "", err
 	}
-	return fmt.Sprint(len(points)), nil
+
+	return fmt.Sprint(len(pointCloud)), nil
 }
 func (d *DayImpl) Part2() (string, error) {
 	return "", nil

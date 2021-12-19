@@ -75,7 +75,8 @@ func Run(day Day) {
 		}()
 
 		fmt.Printf("\033[1;33mPart%d: %s\033[0m", part, Frames[currentFrame])
-	Loop:
+
+		done := false
 		for {
 			select {
 			case <-ticker.C:
@@ -84,11 +85,14 @@ func Run(day Day) {
 			case ans := <-ansChan:
 				fmt.Printf("\r\033[1;32mPart%d: ✓\033[0m (%s)\n\n", part, time.Since(start))
 				fmt.Println(ans)
-				break Loop
+				done = true
 			case err := <-errChan:
 				fmt.Printf("\r\033[1;31mPart%d: 𐄂\033[0m (%s)\n\n", part, time.Since(start))
 				fmt.Println(err)
-				break Loop
+				done = true
+			}
+			if done {
+				break
 			}
 		}
 		fmt.Println("")
