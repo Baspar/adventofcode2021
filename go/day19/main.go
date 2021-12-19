@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	utils "github.com/baspar/adventofcode2021/internal"
+	"github.com/baspar/adventofcode2021/internal/math"
 )
 
 const COS int = 0
@@ -16,6 +17,18 @@ var rotY = Matrix{{COS, 0, SIN}, {0, 1, 0}, {-SIN, 0, COS}}
 var rotZ = Matrix{{COS, -SIN, 0}, {SIN, COS, 0}, {0, 0, 1}}
 
 type Point [3]int
+func (p1 Point) distance(p2 Point) (dist int) {
+	for i := range p1 {
+		dist += math.Abs(p1[i] - p2[i])
+	}
+	return
+}
+func (p1 Point) add(p2 Point) (p Point) {
+	for i := range p {
+		p[i] = p1[i] + p2[i]
+	}
+	return
+}
 func (p1 Point) minus(p2 Point) (p Point) {
 	for i := range p {
 		p[i] = p1[i] - p2[i]
@@ -87,31 +100,31 @@ func (scanner Scanner) allPermutations() (scanners []Scanner) {
 	return
 }
 func (s Scanner) isAlignedWithCloud(cloud map[Point][]int) (isAligned bool, shift Point) {
-		for p1 := range cloud {
-			for _, p2 := range s {
-				shift = p2.minus(p1)
+	for p1 := range cloud {
+		for _, p2 := range s {
+			shift = p2.minus(p1)
 
-				alignedPoints := make(map[int]int)
-				for _, p := range s.shiftBy(shift) {
-					if scanners, exists := cloud[p]; exists {
-						for _, scannerId := range scanners {
-							alignedPoints[scannerId]++
-							if alignedPoints[scannerId] >= 12 {
-								return true, shift
-							}
+			alignedPoints := make(map[int]int)
+			for _, p := range s.shiftBy(shift) {
+				if scanners, exists := cloud[p]; exists {
+					for _, scannerId := range scanners {
+						alignedPoints[scannerId]++
+						if alignedPoints[scannerId] >= 12 {
+							return true, shift
 						}
 					}
 				}
 			}
 		}
-		return false, shift
+	}
+	return false, shift
 }
 
 type DayImpl struct {
 	scanners []Scanner
 }
-func (d DayImpl) alignScanners() (alignedScanners map[int]Scanner, pointCloud map[Point][]int, err error) {
-	alignedScanners = make(map[int]Scanner)
+func (d DayImpl) alignScanners() (scannerLocations []Point, pointCloud map[Point][]int, err error) {
+	alignedScanners := make(map[int]Scanner)
 	otherScannersOrientations := make(map[int][]Scanner)
 	for i, scanner := range d.scanners {
 		if i == 0 {
@@ -120,6 +133,9 @@ func (d DayImpl) alignScanners() (alignedScanners map[int]Scanner, pointCloud ma
 			otherScannersOrientations[i] = scanner.allPermutations()
 		}
 	}
+
+	scannerLocations = make([]Point, len(d.scanners))
+	scannerLocations[0] = Point{0, 0, 0}
 
 	pointCloud = make(map[Point][]int)
 	for _, point := range d.scanners[0] {
@@ -132,6 +148,7 @@ func (d DayImpl) alignScanners() (alignedScanners map[int]Scanner, pointCloud ma
 				if isAligned, shift := s.isAlignedWithCloud(pointCloud); isAligned {
 					alignedScanners[scannerId] = s
 					delete(otherScannersOrientations, scannerId)
+					scannerLocations[scannerId] = shift
 					fmt.Printf("\nAligned scanner %d (%d/%d)   \r\033[1F", scannerId, len(alignedScanners), len(d.scanners))
 					for _, p := range s {
 						p = p.minus(shift)
@@ -153,6 +170,7 @@ func (d DayImpl) alignScanners() (alignedScanners map[int]Scanner, pointCloud ma
 	return
 }
 func (d *DayImpl) Init(lines []string) error {
+	d.scanners = make([]Scanner, 0)
 	scanner := make(Scanner, 0)
 	for _, line := range lines {
 		if line == "" {
@@ -177,7 +195,20 @@ func (d *DayImpl) Part1() (string, error) {
 	return fmt.Sprint(len(pointCloud)), nil
 }
 func (d *DayImpl) Part2() (string, error) {
-	return "", nil
+	scannerLocations, _, err := d.alignScanners()
+	if err != nil {
+		return "", err
+	}
+
+	maxDistance := 0
+	for i, s1 := range scannerLocations {
+		for j, s2 := range scannerLocations {
+			if j > i {
+				maxDistance = math.Max(maxDistance, s1.distance(s2))
+			}
+		}
+	}
+	return fmt.Sprint(maxDistance), nil
 }
 
 func main() {
