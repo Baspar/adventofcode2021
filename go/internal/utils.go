@@ -48,6 +48,9 @@ func Run(day Day) {
 
 	lines := SanitizeInput(string(content))
 
+	fmt.Print("\033[?25l")
+	defer fmt.Print("\033[?25h")
+
 	processPart := func(part int, f func() (string, error)) {
 		var start time.Time
 
